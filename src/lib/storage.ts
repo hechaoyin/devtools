@@ -19,4 +19,5 @@ export const STORAGE_KEYS = {
   apps: 'toolbox:apps:v1',
   windows: 'toolbox:windows:v1',
   settings: 'toolbox:settings:v1',
+  groups: 'toolbox:groups:v1',
 } as const

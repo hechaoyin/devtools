@@ -6,6 +6,7 @@ import { Search, Sun, Moon } from 'lucide-vue-next'
 import { useWindowsStore } from '@/stores/windows'
 import { useAppsStore } from '@/stores/apps'
 import { useUiStore, type MenuItem } from '@/stores/ui'
+import { useGroupsStore } from '@/stores/groups'
 import { useSettingsStore } from '@/stores/settings'
 import { useActions } from '@/lib/actions'
 
@@ -13,6 +14,7 @@ const windows = useWindowsStore()
 const apps = useAppsStore()
 const ui = useUiStore()
 const settings = useSettingsStore()
+const groups = useGroupsStore()
 const { launch, openManager, openSettings } = useActions()
 
 const now = useClock()
@@ -64,6 +66,7 @@ const menus = computed<{ id: string; label: string; bold?: boolean; items: MenuI
     id: 'file',
     label: '文件',
     items: [
+      { label: '新建应用组', action: () => groups.createAndRename() },
       { label: '新建自定义工具…', action: () => openManager('custom', 'new') },
       { separator: true },
       { label: '导入配置…', action: () => openManager('custom', 'import') },

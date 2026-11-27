@@ -56,3 +56,12 @@ export interface WindowState {
   minimized: boolean
   maximized: boolean
 }
+
+/** 桌面应用组：名称、包含的应用 id、桌面位置 */
+export interface AppGroup {
+  id: string
+  name: string
+  appIds: string[]
+  x: number
+  y: number
+}
