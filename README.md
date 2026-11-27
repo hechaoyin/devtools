@@ -21,6 +21,7 @@
 | JSON | 格式化（可选缩进、键排序；非法 JSON 时错误位置前照常格式化、其后标红并提示行列号）、树视图（折叠 / 展开、类型着色、虚拟滚动）、压缩、校验、转义 / 去转义、转 XML（可发送到 XML 工具） |
 | XML | 格式化、压缩、格式良好性校验 |
 | 哈希 | MD5、SHA-1 / 224 / 256 / 384 / 512，支持 HMAC，输出大小写切换 |
+| 加解密 | 对称：AES-128/192/256（ECB / CBC / CTR / GCM）、DES、3DES、RC4，PKCS7 / ZeroPadding / NoPadding，密钥与 IV 支持文本 / Hex / Base64；非对称：RSA 密钥对生成、公钥加密 / 私钥解密（PKCS#1 v1.5 / OAEP）、签名 / 验签（PKCS#1 / PSS）；HMAC；国密 SM2（密钥对、加解密 C1C3C2 / C1C2C3、签名验签）、SM3（含 HMAC-SM3）、SM4（ECB / CBC / CTR / GCM）。全部在浏览器本地运算 |
 | Base64 | UTF-8 安全的编码 / 解码，支持 URL-safe |
 | URL 编解码 | `encodeURIComponent` / `encodeURI` 及解码，解析查询参数表格 |
 | 时间戳 | 秒 / 毫秒自动识别，时区切换，日期 ↔ 时间戳互转，当前时间 |
@@ -52,7 +53,7 @@
 
 ## 技术栈
 
-Vue 3 + TypeScript、Vite、Pinia、Tailwind CSS v4、VueUse、CodeMirror 6、Vitest；哈希使用 `crypto-js`，XML 格式化使用 `xml-formatter`。
+Vue 3 + TypeScript、Vite、Pinia、Tailwind CSS v4、VueUse、CodeMirror 6、Vitest；哈希使用 `crypto-js`，加解密使用 `crypto-js`（AES/DES/3DES/RC4/HMAC）、`node-forge`（RSA、AES-GCM）与 `sm-crypto-v2`（SM2/SM3/SM4），XML 格式化使用 `xml-formatter`。
 
 ## 开发
 

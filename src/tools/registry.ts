@@ -1,5 +1,6 @@
 import { Binary, Clock, FileCode2, Fingerprint, Link2 } from 'lucide-vue-next'
 import type { BuiltinToolManifest } from '@/types'
+import { cryptoTool } from './crypto/manifest'
 import { jsonTool } from './json/manifest'
 
 /** 内置工具注册表：新增工具只需在 src/tools/<id>/ 添加视图并在此追加一项 */
@@ -27,6 +28,7 @@ export const BUILTIN_TOOLS: BuiltinToolManifest[] = [
     minSize: { w: 480, h: 400 },
     component: () => import('./hash/HashTool.vue'),
   },
+  cryptoTool,
   {
     id: 'base64',
     name: 'Base64',
