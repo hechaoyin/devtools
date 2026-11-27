@@ -117,8 +117,8 @@ describe('windows store', () => {
 describe('apps store', () => {
   it('默认安装全部内置工具并固定到 Dock', () => {
     const s = useAppsStore()
-    expect(s.installedApps.map((a) => a.id)).toEqual(['json', 'xml', 'hash', 'base64', 'url', 'timestamp'])
-    expect(s.pinnedApps).toHaveLength(6)
+    expect(s.installedApps.map((a) => a.id)).toEqual(['json', 'xml', 'hash', 'crypto', 'base64', 'url', 'timestamp'])
+    expect(s.pinnedApps).toHaveLength(7)
   })
 
   it('卸载与重新安装内置工具', () => {
