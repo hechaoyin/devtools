@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { clampGroupPos, findFreeSlot, useGroupsStore } from './groups'
 import { useAppsStore } from './apps'
+import { useUiStore } from './ui'
 import { DOCK_RESERVED, GROUP_H, GROUP_W, MENU_BAR_HEIGHT } from '@/lib/layout'
 
 const VP = { w: 1280, h: 800 }
@@ -99,6 +100,72 @@ describe('groups store', () => {
     s.remove(a)
     expect(s.groups.map((g) => g.id)).toEqual([b])
     expect(s.popover).toBeNull()
+  })
+
+  it('组内应用可调整顺序，结果会持久化', async () => {
+    const s = fresh()
+    const id = s.create({ appIds: ['json', 'xml', 'hash', 'url'] })
+    expect(s.moveApp(id, 'json', 2)).toBe(true)
+    expect(s.get(id)!.appIds).toEqual(['xml', 'hash', 'json', 'url'])
+    expect(s.moveApp(id, 'url', 0)).toBe(true)
+    expect(s.get(id)!.appIds).toEqual(['url', 'xml', 'hash', 'json'])
+    expect(s.moveApp(id, 'xml', 99)).toBe(true)
+    expect(s.get(id)!.appIds).toEqual(['url', 'hash', 'json', 'xml'])
+    expect(s.moveApp(id, 'xml', 3)).toBe(false)
+    expect(s.moveApp(id, 'nope', 0)).toBe(false)
+    expect(s.moveApp('missing', 'url', 0)).toBe(false)
+    await tick()
+    expect(fresh().get(id)!.appIds).toEqual(['url', 'hash', 'json', 'xml'])
+  })
+
+  it('按住组内应用时移开指针不会收起，松手且已离开后才收起', async () => {
+    const s = fresh()
+    const id = s.create()
+    s.pointerEnter(id)
+    s.holdPopover()
+    s.pointerLeave()
+    await new Promise((r) => setTimeout(r, 260))
+    expect(s.popover?.groupId).toBe(id)
+    s.releasePopover()
+    await new Promise((r) => setTimeout(r, 260))
+    expect(s.popover).toBeNull()
+  })
+
+  it('按住期间关掉右键菜单不会收起弹层', async () => {
+    const s = fresh()
+    const ui = useUiStore()
+    const id = s.create()
+    s.pointerEnter(id)
+    s.holdPopover()
+    s.pointerLeave()
+    ui.showContextMenu(0, 0, [{ label: '打开' }])
+    ui.hideContextMenu()
+    await new Promise((r) => setTimeout(r, 260))
+    expect(s.popover?.groupId).toBe(id)
+    s.releasePopover()
+  })
+
+  it('按住组内应用时不会切换到其他组', () => {
+    const s = fresh()
+    const a = s.create()
+    const b = s.create()
+    s.pointerEnter(a)
+    s.holdPopover()
+    s.pointerEnter(b)
+    expect(s.popover?.groupId).toBe(a)
+    s.releasePopover()
+    expect(s.holding).toBe(false)
+  })
+
+  it('菜单打开的弹层在按住松开后仍保持，直到点击外部', async () => {
+    const s = fresh()
+    const id = s.create()
+    s.openPopover(id)
+    s.holdPopover()
+    s.pointerLeave()
+    s.releasePopover()
+    await new Promise((r) => setTimeout(r, 260))
+    expect(s.popover?.groupId).toBe(id)
   })
 
   it('拖动位置受约束', () => {

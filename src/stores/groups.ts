@@ -83,6 +83,8 @@ export const useGroupsStore = defineStore('groups', () => {
   const popover = ref<GroupPopoverState | null>(null)
   const renamingId = ref<string | null>(null)
   const draggingId = ref<string | null>(null)
+  /** 组内图标按下到松手期间为 true，避免拖出弹层时被收起或切到其他组 */
+  const holding = ref(false)
   let pointerInside = false
   let closeTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -176,6 +178,21 @@ export const useGroupsStore = defineStore('groups', () => {
     else addApp(id, appId)
   }
 
+  /** 将组内应用移到 toIndex。下标按移动前的顺序计算，应用最终落在该位置。 */
+  function moveApp(id: string, appId: string, toIndex: number): boolean {
+    const g = get(id)
+    if (!g || !Number.isFinite(toIndex)) return false
+    const from = g.appIds.indexOf(appId)
+    if (from < 0) return false
+    const to = Math.max(0, Math.min(Math.round(toIndex), g.appIds.length - 1))
+    if (from === to) return false
+    const next = g.appIds.slice()
+    next.splice(from, 1)
+    next.splice(to, 0, appId)
+    g.appIds = next
+    return true
+  }
+
   function moveTo(id: string, x: number, y: number) {
     const g = get(id)
     if (!g) return
@@ -205,7 +222,7 @@ export const useGroupsStore = defineStore('groups', () => {
 
   /** 指针进入组图标或弹层 */
   function pointerEnter(groupId: string) {
-    if (draggingId.value || renamingId.value === groupId || !get(groupId)) return
+    if (draggingId.value || holding.value || renamingId.value === groupId || !get(groupId)) return
     clearCloseTimer()
     pointerInside = true
     if (popover.value?.groupId === groupId) {
@@ -218,8 +235,21 @@ export const useGroupsStore = defineStore('groups', () => {
   /** 指针离开组图标或弹层 */
   function pointerLeave() {
     pointerInside = false
-    if (popover.value?.sticky) return
+    if (popover.value?.sticky || holding.value) return
     scheduleClose()
+  }
+
+  /** 组内图标按下：按住期间不收起、不切换弹层 */
+  function holdPopover() {
+    holding.value = true
+    clearCloseTimer()
+  }
+
+  /** 松手后恢复悬停关闭；指针已在外面且非粘滞时再安排关闭 */
+  function releasePopover() {
+    if (!holding.value) return
+    holding.value = false
+    if (popover.value && !pointerInside && !popover.value.sticky) scheduleClose()
   }
 
   /** 右键菜单等入口：直接展开并保持，直到点击外部 */
@@ -250,7 +280,7 @@ export const useGroupsStore = defineStore('groups', () => {
   watch(
     () => ui.contextMenu,
     (menu) => {
-      if (!menu && popover.value && !pointerInside && !popover.value.sticky) scheduleClose()
+      if (!menu && popover.value && !holding.value && !pointerInside && !popover.value.sticky) scheduleClose()
     },
   )
 
@@ -260,6 +290,7 @@ export const useGroupsStore = defineStore('groups', () => {
     popover,
     renamingId,
     draggingId,
+    holding,
     get,
     setViewport,
     create,
@@ -269,11 +300,14 @@ export const useGroupsStore = defineStore('groups', () => {
     addApp,
     removeApp,
     toggleApp,
+    moveApp,
     moveTo,
     closePopover,
     pointerEnter,
     pointerLeave,
     openPopover,
+    holdPopover,
+    releasePopover,
     setMode,
     startRename,
     finishRename,
