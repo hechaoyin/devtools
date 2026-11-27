@@ -1,18 +1,8 @@
-export interface JsonError {
-  message: string
-  line?: number
-  column?: number
-  position?: number
-}
+import type { JsonError, JsonResult, JsonValidation } from './types'
 
-export type JsonResult = { ok: true; value: string } | { ok: false; error: JsonError }
+export type { JsonError, JsonResult, JsonValidation } from './types'
 
-export interface JsonValidation {
-  valid: boolean
-  error?: JsonError
-}
-
-function offsetToLineColumn(text: string, position: number) {
+export function offsetToLineColumn(text: string, position: number) {
   const before = text.slice(0, Math.max(0, Math.min(position, text.length)))
   const lines = before.split('\n')
   return { line: lines.length, column: lines[lines.length - 1].length + 1 }

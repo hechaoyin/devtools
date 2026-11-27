@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import EditorPane from '@/components/EditorPane.vue'
+import { pendingXmlInput } from './handoff'
 import { formatXml, minifyXml, validateXml, type XmlResult } from './logic'
 
 const SAMPLE = '<?xml version="1.0" encoding="UTF-8"?><catalog><book id="1"><title>Vue 3 设计与实现</title><price>79.00</price></book><book id="2"><title>TypeScript 入门</title><price>59.00</price></book></catalog>'
@@ -23,6 +24,16 @@ function apply(r: XmlResult, okMessage: string) {
     status.value = { kind: 'error', message: r.error }
   }
 }
+function takePending() {
+  if (pendingXmlInput.value === null) return
+  input.value = pendingXmlInput.value
+  pendingXmlInput.value = null
+  output.value = ''
+  status.value = { kind: 'ok', message: '已接收来自其它工具的 XML' }
+}
+takePending()
+watch(pendingXmlInput, takePending)
+
 const format = () => apply(formatXml(input.value, indentValue.value), '格式化完成')
 const minify = () => apply(minifyXml(input.value), '压缩完成')
 function validate() {

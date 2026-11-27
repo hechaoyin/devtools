@@ -1,19 +1,10 @@
-import { Binary, Braces, Clock, FileCode2, Fingerprint, Link2 } from 'lucide-vue-next'
+import { Binary, Clock, FileCode2, Fingerprint, Link2 } from 'lucide-vue-next'
 import type { BuiltinToolManifest } from '@/types'
+import { jsonTool } from './json/manifest'
 
 /** 内置工具注册表：新增工具只需在 src/tools/<id>/ 添加视图并在此追加一项 */
 export const BUILTIN_TOOLS: BuiltinToolManifest[] = [
-  {
-    id: 'json',
-    name: 'JSON 工具',
-    description: '格式化、压缩、校验、转义与反转义',
-    category: '数据格式',
-    icon: Braces,
-    color: 'orange',
-    defaultSize: { w: 860, h: 560 },
-    minSize: { w: 520, h: 360 },
-    component: () => import('./json/JsonTool.vue'),
-  },
+  jsonTool,
   {
     id: 'xml',
     name: 'XML 工具',
